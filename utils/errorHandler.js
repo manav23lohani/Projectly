@@ -18,7 +18,7 @@ const errorHandler = (err, req, res, next) => {
         errorType = "Server Error";
         break;
     default:
-        console.log("No errors");
+        errorType = "Invalid input"
         break;
   }
     res.json({reason:errorType, message: err.message});
