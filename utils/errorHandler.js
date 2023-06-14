@@ -1,5 +1,11 @@
+const notFound = (req,res,next) => {
+    const error = new Error(`Invalid URL! Please try again`);
+    res.status(404);
+    next(error);
+}
+
 const errorHandler = (err, req, res, next) => {
-  const statusCode = res.statusCode ? res.statusCode : 500;
+    const statusCode = res.statusCode===200 ? 500: res.statusCode;
   let errorType;
   switch (statusCode) {
     case 400:
@@ -18,9 +24,9 @@ const errorHandler = (err, req, res, next) => {
         errorType = "Server Error";
         break;
     default:
-        errorType = "Invalid input"
+        errorType = "Something went wrong, please try again";
         break;
   }
-    res.json({reason:errorType, message: err.message});
+    res.json({code:statusCode,reason:errorType, message: err.message});
 };
-module.exports = errorHandler;
+module.exports = {notFound,errorHandler};

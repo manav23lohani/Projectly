@@ -12,10 +12,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.0",
     "env": "^0.0.2",
     "express": "^4.18.2",
     "express-async-handler": "^1.2.0",
-    "mongoose": "^7.2.2"
+    "mongoose": "^7.2.2",
+    "validator": "^13.9.0"
   },
   "devDependencies": {
     "dotenv": "^16.1.4"
