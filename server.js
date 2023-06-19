@@ -1,6 +1,6 @@
 const express = require("express");
-const {notFound,errorHandler} = require("./utils/errorHandler");
-const DBconnect = require("./utils/dbConnection");
+const {notFound,errorHandler} = require("./Middlewares/errorHandler");
+const DBconnect = require("./Utils/dbConnection");
 require("dotenv").config();
 const app = express();
 

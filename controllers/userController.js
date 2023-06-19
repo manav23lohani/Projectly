@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 const bcyrpt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const generateToken = require("../Utils/generateToken");
 
 const registerUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
@@ -19,13 +19,12 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error("User already registered");
   }
   const hashedPassword = await bcyrpt.hash(password, 5);
-  // console.log(("hashed password", hashedPassword));
   const user = await User.create({
     username,
     email,
     password: hashedPassword,
   });
-  // console.log(`User created ${user}`);
+
   if (user) {
     res.status(201).json({ username: user.username, email: user.email });
   } else {
@@ -42,27 +41,43 @@ const loginUser = asyncHandler(async (req, res) => {
   }
   const user = await User.findOne({ email });
   if (user && (await bcyrpt.compare(password, user.password))) {
-    const accessToken = jwt.sign(
-      {
-        user: {
-          username: user.username,
-          email: user.email,
-          id: user.id,
-        },
-      },
-      process.env.ACCESS_TOKEN_SECRET,
-      {expiresIn: "1d"}
-    );
-    res.status(200).json({ accessToken });
-  }
-  else{
+    const accessToken = generateToken(user._id);
+    res.status(200).json({
+      username: user.username,
+      email: user.email,
+      id: user._id,
+      token: accessToken,
+    });
+  } else {
     res.status(401);
     throw new Error("Incorrect login credentials");
   }
 });
 
-const userProfile = asyncHandler(async(req,res) => {
-  res.json(req.user);
-})
+const updateProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (user) {
+    user.username = req.body.username || user.username;
+    user.email = req.body.email || user.email;
 
-module.exports = { registerUser, loginUser , userProfile };
+    if (req.body.password) {
+      const hashedNewPassword = await bcyrpt.hash(req.body.password, 5);
+      user.password = hashedNewPassword;
+    }
+
+    const updatedUser = await user.save();
+
+    const accessToken = generateToken(user._id);
+    res.status(200).json({
+        username: updatedUser.username,
+        email: updatedUser.email,
+        id: updatedUser._id,
+        token: accessToken,
+      });
+  } else {
+    res.status(404);
+    throw new Error("User Not Found");
+  }
+});
+
+module.exports = { registerUser, loginUser, updateProfile };

@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const {getProjects,addProject,getProject,updateProject,deleteProject} = require("../controllers/projectController");
-const validateToken = require("../utils/validateToken");
+const userAuth = require("../Middlewares/userAuth");
 
-router.use(validateToken);
+router.use(userAuth);
 
 router.route("/").get(getProjects).post(addProject);
 

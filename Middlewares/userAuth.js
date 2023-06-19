@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 
-const validateToken = asyncHandler(async(req,res,next) => {
+const userAuth = asyncHandler(async(req,res,next) => {
     let token;
     let authHeader = req.headers.authorization;
 
@@ -21,4 +21,4 @@ const validateToken = asyncHandler(async(req,res,next) => {
         throw new Error("Token is missing");
     }
 });
-module.exports = validateToken; 
+module.exports = userAuth;
