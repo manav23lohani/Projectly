@@ -12,7 +12,8 @@ const userAuth = asyncHandler(async(req,res,next) => {
                 res.status(401);
                 throw new Error("User is not authorized");
             }
-            req.user = decoded.user;
+            // console.log(decoded);
+            req.user = decoded;
             next();
         });
     }

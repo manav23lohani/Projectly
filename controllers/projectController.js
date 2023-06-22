@@ -2,12 +2,13 @@ const asyncHandler = require("express-async-handler");
 const Project = require("../models/projectModel");
 
 const getProjects = asyncHandler(async (req, res) => {
+  // console.log(req.user);
   const projects = await Project.find({ user_id: req.user.id });
   res.status(200).json(projects);
 });
 
 const addProject = asyncHandler(async (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
   const {
     title,
     status,
