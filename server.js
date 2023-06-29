@@ -1,5 +1,5 @@
 const express = require("express");
-const {notFound,errorHandler} = require("./Middlewares/errorHandler");
+const {notFound,errorHandler} = require("./middlewares/errorHandler");
 const DBconnect = require("./Utils/dbConnection");
 require("dotenv").config();
 const app = express();
@@ -9,6 +9,7 @@ DBconnect();
 
 app.use("/api/projects", require("./routes/projectRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
+app.use("/api/projectMember", require("./routes/requestRoutes"));
 
 app.use(notFound);
 app.use(errorHandler);
