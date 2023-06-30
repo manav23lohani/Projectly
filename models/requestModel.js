@@ -10,10 +10,9 @@ const requestSchema = new mongoose.Schema({
         ref: 'User',
     },
     isAccepted: {
-        type: Boolean, 
+        type: Boolean,
         default: false,
-    },
-        
+    }   
 }, {timestamps: true})
 
 module.exports = mongoose.model("Request", requestSchema);

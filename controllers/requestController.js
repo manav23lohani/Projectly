@@ -6,61 +6,95 @@ const Request = require("../models/requestModel");
 const sendRequest = asyncHandler(async (req, res) => {
   const userId = req.body.userId;
   const projectId = req.body.projectId;
-  
+
   const project = await Project.findById(projectId);
   const user = await User.findById(userId);
   if (!project || !user) {
     res.status(404);
     throw new Error("Project or user doesn't exists");
   }
-  
-  if(project.user_id.toString() !== req.user.id){
+
+  if (project.user_id.toString() !== req.user.id) {
     res.status(403);
     throw new Error("Not permitted to send request for other user projects");
   }
-  
+
   const RequestExist = await Request.findOne({
     sender: projectId,
     receiver: userId,
   });
   if (RequestExist) {
-    res.status(201).send({ message: "Request has already been sent" });
+    if(RequestExist.isAccepted == false){
+      res.status(201).send({ message: "Request is already pending" });
+    }else{
+      res.status(201).send({message: "User is already a member in the project"});
+    }
   } else {
-    const data = new Request({
+    await Request.create({
       sender: projectId,
       receiver: userId,
     });
-    await data.save();
     res.status(201).send({ message: "Request sent successfully" });
   }
 });
 
 const recieveRequest = asyncHandler(async (req, res) => {
-  const requests = await Request.find({
-    receiver: req.user.id,
-    isAccepted: false,
-  });
-
+  const requests = await Request.find({ receiver: req.user.id, isAccepted: false});
   let memberRequests = [];
-  
   if (requests) {
-    let runMap = requests.map(async(request) => {
+    let runMap = requests.map(async (request) => {
       let projectInfo = await Project.findById(request.sender);
-    //   console.log(projectInfo);
+      //   console.log(projectInfo);
+      const projectOwner = await User.findById(projectInfo.user_id);
       let projectObj = {
+        projectId: projectInfo.id,
         title: projectInfo.title,
         techStack: projectInfo.techStack,
         description: projectInfo.description,
+        owner: projectOwner.username,
       };
       memberRequests.push(projectObj);
     });
-
     await Promise.all(runMap);
-    
     res.status(201).send(memberRequests);
-  } 
-  else {
+  } else {
     res.status(201).send([]);
   }
 });
-module.exports = {sendRequest, recieveRequest};
+
+const acceptRequest = asyncHandler(async (req, res) => {
+  const projectId = req.body.projectId;
+  const project = await Project.findById(projectId);
+  const user = await User.findById(req.user.id);
+  const request = await Request.findOne({ sender: projectId, receiver: req.user.id });
+
+  if (request) {
+    user.associatedProjects.push(projectId);
+    await user.save();
+    project.members.push(user.id);
+    await project.save();
+
+    request.isAccepted = true;
+    await request.save();
+
+    res.status(201).send({ message: "Request accepted" });
+  } else {
+    res.status(201).send({ message: "No such request exits" });
+  }
+});
+
+const declineRequest = asyncHandler(async (req, res) => {
+  const projectId = req.body.projectId;
+  const request = await Request.findOne({
+    sender: projectId,
+    receiver: req.user.id,
+    isAccepted: false
+  });
+  if (request) {
+    await Request.deleteOne({ sender: projectId, receiver: req.user.id });
+    res.status(201).send({ message: "Request declined for this project" });
+  } else {
+    res.status(201).send({ message: "No such request exits" });
+  }
+});
+module.exports = { sendRequest, recieveRequest, acceptRequest, declineRequest };

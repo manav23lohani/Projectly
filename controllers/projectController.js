@@ -18,7 +18,7 @@ const addProject = asyncHandler(async (req, res) => {
     endDate,
     priority,
   } = req.body;
-  if (!title || !status || !description) {
+  if (!title || !techStack || !description) {
     res.status(400);
     throw new Error("Fill necessary details");
   }

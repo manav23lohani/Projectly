@@ -18,7 +18,13 @@ const userSchema = mongoose.Schema(
     verified: {
       type: Boolean,
       default: false,
-    }
+    },
+    associatedProjects: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Project",
+      },
+    ],
   },
   {
     timestamps: true,
