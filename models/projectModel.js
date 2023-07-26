@@ -26,11 +26,6 @@ const projectSchema = new mongoose.Schema({
   endDate: {
     type: Date,
   },
-  priority: {
-    type: String,
-    enum: ["high", "medium", "low"],
-    default: "medium",
-  },
   members: [
     {
       type: mongoose.Schema.Types.ObjectId,

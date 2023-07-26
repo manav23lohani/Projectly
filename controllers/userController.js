@@ -6,10 +6,14 @@ const jwt = require("jsonwebtoken");
 const generateToken = require("../utils/generateToken");
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { username, email, password } = req.body;
-  if (!username || !email || !password) {
+  const { username, email, password, confirmPassword } = req.body;
+  if (!username || !email || !password || !confirmPassword) {
     res.status(400);
     throw new Error("All fields are mandatory");
+  }
+  if(password !== confirmPassword){
+    res.status(400);
+    throw new Error("Passwords do not match");
   }
   if (password.length < 5) {
     res.status(400);
@@ -27,10 +31,10 @@ const registerUser = asyncHandler(async (req, res) => {
     password: hashedPassword,
     verified: false,
   });
-  if (!user) {
-    res.status(400);
-    throw new Error("User data is not valid");
-  }
+  // if (!user) {
+  //   res.status(400);
+  //   throw new Error("User data is not valid");
+  // }
 
   // sending verification mail
   let token = await generateToken(user._id);
@@ -73,7 +77,7 @@ const loginUser = asyncHandler(async (req, res) => {
   }
   let verified = user.verified;
   if (!verified) {
-    return res.status(201).json({ message: "Please verify your account first" });
+    return res.status(400).json({ message: "Please verify your account first" });
   }
   if (await bcyrpt.compare(password, user.password)) {
     const accessToken = generateToken(user._id);

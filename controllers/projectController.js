@@ -1,10 +1,14 @@
 const asyncHandler = require("express-async-handler");
 const Project = require("../models/projectModel");
+const User = require("../models/userModel");
 
 const getProjects = asyncHandler(async (req, res) => {
   // console.log(req.user);
   const projects = await Project.find({ user_id: req.user.id });
-  res.status(200).json(projects);
+  const user = await User.findById(req.user.id).populate("associatedProjects");
+  const associatedProjects = user.associatedProjects;
+  const response = [...projects, ...associatedProjects];
+  res.status(200).json(response);
 });
 
 const addProject = asyncHandler(async (req, res) => {
