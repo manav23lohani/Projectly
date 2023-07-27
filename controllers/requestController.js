@@ -1,11 +1,12 @@
 const asyncHandler = require("express-async-handler");
 const Project = require("../models/projectModel");
+const mongoose = require("mongoose");
 const User = require("../models/userModel");
 const Request = require("../models/requestModel");
 
 const sendRequest = asyncHandler(async (req, res) => {
-  const userId = req.body.userId;
-  const projectId = req.body.projectId;
+  const userId = new mongoose.Types.ObjectId(req.body.userId);
+  const projectId = new mongoose.Types.ObjectId(req.body.projectId);
 
   const project = await Project.findById(projectId);
   const user = await User.findById(userId);

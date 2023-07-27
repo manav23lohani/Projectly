@@ -27,6 +27,7 @@ const errorHandler = (err, req, res, next) => {
         errorType = "Something went wrong, please try again";
         break;
   }
-    res.json({code:statusCode,reason:errorType, message: err.message});
+    res.status(statusCode);
+    res.json({reason:errorType, message: err.message});
 };
 module.exports = {notFound,errorHandler};
