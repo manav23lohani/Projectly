@@ -5,21 +5,18 @@ const User = require("../models/userModel");
 const Request = require("../models/requestModel");
 
 const sendRequest = asyncHandler(async (req, res) => {
-  const userId = new mongoose.Types.ObjectId(req.body.userId);
+  const userName = req.body.userName;
   const projectId = new mongoose.Types.ObjectId(req.body.projectId);
 
   const project = await Project.findById(projectId);
-  const user = await User.findById(userId);
+  const user = await User.findOne({username: userName});
+
   if (!project || !user) {
     res.status(404);
     throw new Error("Project or user doesn't exists");
   }
-
-  if (project.user_id.toString() !== req.user.id) {
-    res.status(403);
-    throw new Error("Not permitted to send request for other user projects");
-  }
-
+  
+  const userId = user._id;
   const RequestExist = await Request.findOne({
     sender: projectId,
     receiver: userId,
