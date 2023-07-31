@@ -19,7 +19,7 @@ const registerUser = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Minimum password length is 6");
   }
-  const userAvailable = await User.findOne({ username });
+  const userAvailable = await User.findOne({ email });
   if (userAvailable) {
     res.status(400);
     throw new Error("User already registered");

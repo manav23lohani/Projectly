@@ -5,12 +5,11 @@ const User = require("../models/userModel");
 const Request = require("../models/requestModel");
 
 const sendRequest = asyncHandler(async (req, res) => {
-  const userName = req.body.userName;
+  const userMail = req.body.userMail;
   const projectId = new mongoose.Types.ObjectId(req.body.projectId);
 
   const project = await Project.findById(projectId);
-  const user = await User.findOne({username: userName});
-
+  const user = await User.findOne({email: userMail});
   if (!project || !user) {
     res.status(404);
     throw new Error("Project or user doesn't exists");
