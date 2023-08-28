@@ -5,9 +5,7 @@ const app = express();
 const cors = require("cors");
 const PORT = process.env.PORT || 5001;
 
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config();
-}
+    // require('dotenv').config();
 app.use(express.json());
 app.use(cors());
 app.use("/api/projects", require("./routes/projectRoutes"));
