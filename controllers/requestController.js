@@ -9,22 +9,24 @@ const sendRequest = asyncHandler(async (req, res) => {
   const projectId = new mongoose.Types.ObjectId(req.body.projectId);
 
   const project = await Project.findById(projectId);
-  const user = await User.findOne({email: userMail});
+  const user = await User.findOne({ email: userMail });
   if (!project || !user) {
     res.status(404);
     throw new Error("Project or user doesn't exists");
   }
-  
+
   const userId = user._id;
   const RequestExist = await Request.findOne({
     sender: projectId,
     receiver: userId,
   });
   if (RequestExist) {
-    if(RequestExist.isAccepted == false){
+    if (RequestExist.isAccepted == false) {
       res.status(201).send({ message: "Request is already pending" });
-    }else{
-      res.status(201).send({message: "User is already a member in the project"});
+    } else {
+      res
+        .status(201)
+        .send({ message: "User is already a member in the project" });
     }
   } else {
     await Request.create({
@@ -36,34 +38,42 @@ const sendRequest = asyncHandler(async (req, res) => {
 });
 
 const recieveRequest = asyncHandler(async (req, res) => {
-  const requests = await Request.find({ receiver: req.user.id, isAccepted: false});
-  let memberRequests = [];
-  if (requests) {
-    let runMap = requests.map(async (request) => {
-      let projectInfo = await Project.findById(request.sender);
-      //   console.log(projectInfo);
-      const projectOwner = await User.findById(projectInfo.user_id);
-      let projectObj = {
-        projectId: projectInfo.id,
-        title: projectInfo.title,
-        techStack: projectInfo.techStack,
-        description: projectInfo.description,
-        owner: projectOwner.username,
-      };
-      memberRequests.push(projectObj);
+    const requests = await Request.find({
+      receiver: req.user.id,
+      isAccepted: false,
     });
-    await Promise.all(runMap);
-    res.status(201).send(memberRequests);
-  } else {
-    res.status(201).send([]);
-  }
+    let memberRequests = [];
+    if (requests) {
+      let runMap = requests.map(async (request) => {
+        let projectInfo = await Project.findById(request.sender);
+        console.log(projectInfo);
+        if (projectInfo) {
+          const projectOwner = await User.findById(projectInfo.user_id);
+          let projectObj = {
+            projectId: projectInfo.id,
+            title: projectInfo.title,
+            techStack: projectInfo.techStack,
+            description: projectInfo.description,
+            owner: projectOwner.username,
+          };
+          memberRequests.push(projectObj);
+        }
+      });
+      await Promise.all(runMap);
+      res.status(201).send(memberRequests);
+    } else {
+      res.status(201).send([]);
+    }
 });
 
 const acceptRequest = asyncHandler(async (req, res) => {
   const projectId = req.body.projectId;
   const project = await Project.findById(projectId);
   const user = await User.findById(req.user.id);
-  const request = await Request.findOne({ sender: projectId, receiver: req.user.id });
+  const request = await Request.findOne({
+    sender: projectId,
+    receiver: req.user.id,
+  });
 
   if (request) {
     user.associatedProjects.push(projectId);
@@ -85,7 +95,7 @@ const declineRequest = asyncHandler(async (req, res) => {
   const request = await Request.findOne({
     sender: projectId,
     receiver: req.user.id,
-    isAccepted: false
+    isAccepted: false,
   });
   if (request) {
     await Request.deleteOne({ sender: projectId, receiver: req.user.id });
